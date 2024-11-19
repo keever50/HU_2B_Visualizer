@@ -1,0 +1,13 @@
+../Core/Src/main.c:89:6:log_out	1
+../Core/Src/main.c:100:5:main	1
+../Core/Src/main.c:184:6:SystemClock_Config	3
+../Core/Src/main.c:230:13:MX_I2C1_Init	2
+../Core/Src/main.c:264:13:MX_I2S3_Init	2
+../Core/Src/main.c:298:13:MX_SPI1_Init	2
+../Core/Src/main.c:336:13:MX_UART4_Init	2
+../Core/Src/main.c:369:13:MX_USART2_UART_Init	2
+../Core/Src/main.c:402:13:MX_GPIO_Init	1
+../Core/Src/main.c:521:6:mainTask	2
+../Core/Src/main.c:545:6:StartDefaultTask	1
+../Core/Src/main.c:568:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:585:6:Error_Handler	1
