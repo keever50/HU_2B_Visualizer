@@ -1,8 +1,0 @@
-../Core/Src/log.c:10:6:_log_debug	1
-../Core/Src/log.c:17:6:_log_info	1
-../Core/Src/log.c:24:6:_log_notice	1
-../Core/Src/log.c:31:6:_log_warning	1
-../Core/Src/log.c:38:6:_log_error	1
-../Core/Src/log.c:45:6:_log_critical	1
-../Core/Src/log.c:52:6:log_setlevel	1
-../Core/Src/log.c:57:6:_log	7

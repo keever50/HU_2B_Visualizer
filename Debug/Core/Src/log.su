@@ -1,8 +1,0 @@
-../Core/Src/log.c:10:6:_log_debug	304	static
-../Core/Src/log.c:17:6:_log_info	296	static
-../Core/Src/log.c:24:6:_log_notice	296	static
-../Core/Src/log.c:31:6:_log_warning	296	static
-../Core/Src/log.c:38:6:_log_error	304	static
-../Core/Src/log.c:45:6:_log_critical	304	static
-../Core/Src/log.c:52:6:log_setlevel	16	static
-../Core/Src/log.c:57:6:_log	160	static
