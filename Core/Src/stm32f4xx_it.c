@@ -27,7 +27,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-void extern DuurDraad();
+void extern trigger();
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -202,7 +202,9 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-  DuurDraad();
+  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+  	trigger();
+  	HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
   /* USER CODE END TIM3_IRQn 1 */
 }
 
