@@ -1,0 +1,3 @@
+[submodule "Core/Src/Very_cool_simple_logging_thing"]
+	path = Core/Src/Very_cool_simple_logging_thing
+	url = https://github.com/keever50/Very_cool_simple_logging_thing.git
