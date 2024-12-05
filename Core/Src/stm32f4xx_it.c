@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,6 +35,9 @@ void extern trigger();
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,6 +47,7 @@ void extern trigger();
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+
 
 /* USER CODE END PV */
 
@@ -214,12 +220,13 @@ void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
+
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
   HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
-  	trigger();
-  	HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+  trigger();
+  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
   /* USER CODE END TIM3_IRQn 1 */
 }
 

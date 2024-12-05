@@ -7,29 +7,37 @@
 #include "main.h"
 #include "stm32f4xx_it.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 extern ADC_HandleTypeDef hadc1;
 //extern ADC_HandleTypeDef hadc2; // voor als we de rechter adc ook willen gebruiken.
 extern DAC_HandleTypeDef hdac;
 
 #define Dig_Bereik 4095.0 // het orginele bereik 12 bits
-#define buffer_Groote 1000 // groote van buffer
-#define afwijking 15 // afwijking tussen punten dat gezien wordt als ruis
+#define buffer_Groote 100 // groote van buffer
+#define afwijking 25 // afwijking tussen punten dat gezien wordt als ruis
 #define LengteRuis 5 // de lengte van deze punten gezien wordt als ruis.
 
 
-bool klaar = false;
+bool klaar =false;
 int16_t buffer[buffer_Groote];
+int16_t AmBuffer[buffer_Groote];
+int16_t inputbuffer[buffer_Groote * 4];
+int16_t hoogste = -2048; // onthoud de hoogste waarde
+int16_t laagste = 2047;
 int tel = 0;
+
+int Printtel = 0;
 
 
 void trigger() // wordt door de interupt van tim3 aangeroepen.
 {
 	if(klaar)
 	{
-		DA_CON(buffer[tel]); // stuurt de buffer uit voor debug
-		if(tel >= buffer_Groote)
-			tel = 0;
+		//Shift(hoogste,laagste);
+		//DA_CON(buffer[Printtel]); // stuurt de buffer uit voor debug
+		if(Printtel >= buffer_Groote-LengteRuis)
+			Printtel = 0;
 		else
 			tel++;
 	}
@@ -64,66 +72,86 @@ void DuurDraad() // debug: kan input direct outputen
 
 void DF() // zet de waardes om van 0 tot 4095 naar -2048 tot 2047.
 {
-
-
-	static int tel = 0; // tel vult de buffer
-
-	static int16_t hoogste = -2048; // onthoud de hoogste waarde
-	static int16_t laagste = 2047; // onthoud de laagste waarde
-
-	static int16_t VorigeSample = -1;
-	static int16_t Ruispunten = 0; // onthoud hoeveel punten een kleine afwijking heeft.
+	static int testTel = 0;
+	 // onthoud de laagste waarde
 
 	int16_t value;
-	uint16_t amplitude;
 
 	value = AD_CON_Links(); // sample
-
 	buffer[tel] = value; // sample wordt opgeslagen in de buffer.
+	inputbuffer[testTel] = value;
 
-	if(hoogste < value) // update de hoogste of laagste value als nodig.
+	if(hoogste < value) // update de hoogste of laagste value
 		hoogste = value;
 	if(laagste > value)
 		laagste = value;
 
-	if( (abs(VorigeSample - value) < afwijking) ) // als er een kleine afwijking inzit onthoud hij dat.
+	tel = Ruis(value,tel); // tel kan veranderen als er ruis is gevonden dan gaat hij deze overschrijven.
+
+	if( tel >= buffer_Groote ) // als de buffer vol is
+	{
+		Shift(hoogste,laagste);
+		//hoogste = 0;
+		//laagste = 4096;
+		//tel = 0;
+		klaar = true;
+
+	}
+	else // anders wordt tel een hoger.
+		tel++;
+
+	//testTel++;
+
+}
+
+int Ruis(int value,int Tel) // zorgt voor de ruis detectie.
+{
+	static int16_t VorigeSample = -1;
+	static int16_t Ruispunten = 0; // onthoud hoeveel punten een kleine afwijking heeft.
+
+	int16_t verschil = abs(VorigeSample - value);
+	if(verschil < afwijking) // als er een kleine afwijking inzit onthoud hij dat.
 	{
 		Ruispunten += 1; // telt de hoeveelheid punten die dicht bij elkaar liggen
+		//TotRuis += verschil;
 	}
-
 	else if(Ruispunten > LengteRuis) // als ruis voor de lengte nog onderling te dicht bij elkaar ligt.
 	{
 		if(Ruispunten > tel ) // als tel -= Ruispunten onder de nul komt wordt tel 1.
 			tel = 0;
 		else // tel komt op de plek van het ruis.
 			tel -= Ruispunten;
-
+		Ruispunten = 0;
+	}
+	else
+	{
 		Ruispunten = 0;
 	}
 
-	tel+=1; // tel gaat eente verder
+	if(tel == Tel)
+		return Tel;
+
 	VorigeSample = value;
 
-	if( tel >= buffer_Groote ) // als de buffer vol is
-	{
-		if(Ruispunten > 0) // als aan het eind nog ruis is.
-		{
-			tel -= Ruispunten; // tel wordt terug gezet op plek van het ruis.
-			Ruispunten = 0;
-		}
-		else // als de buffer helemaal vol zit zonder ruis.
-		{
-			tel = 0;
-			amplitude = hoogste - laagste;
-
-			for(int i = 0; i < buffer_Groote; i++) // versterkt het signaal het hele bereik gebruikt en wordt meteen in juiste bereik gezet.
-			{
-				// voor amplitude testen MOET: - Dig_Bereik/2; weg !!
-				buffer[i] = ((buffer[i] - laagste) * (Dig_Bereik/amplitude)); // - Dig_Bereik/2;
-			}
-			klaar = true; // debug om de buffer uit te sturen via de DACON
-			hoogste= 0;
-			laagste = 4096;
-		}
-	}
+	return tel;
 }
+
+void Shift(int Hoogste, int Laagste) // zorgt voor de verplaatsing voor DFT
+{
+	int16_t amplitude = Hoogste - Laagste;
+	int32_t ScaleFactor = ((int32_t) Dig_Bereik *1024) / amplitude;
+	//int ScaleFactor = 2;
+	int16_t offset = Dig_Bereik/2;
+
+	int32_t scaledoffset = offset + 1024;
+
+	for(int i = 0; i < buffer_Groote; i++) // versterkt het signaal het hele bereik gebruikt en wordt meteen in juiste bereik gezet.
+	{
+		AmBuffer[i] = ( (buffer[i] - Laagste) * ScaleFactor) - scaledoffset;
+	}
+
+	//klaar = true; // debug om de buffer uit te sturen via de DACON
+
+}
+
+
