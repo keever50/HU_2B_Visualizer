@@ -26,6 +26,7 @@
 #include "log.h"
 #include "string.h"
 #include "stdlib.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,6 +42,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -52,7 +54,6 @@ DAC_HandleTypeDef hdac;
 I2C_HandleTypeDef hi2c1;
 
 SPI_HandleTypeDef hspi1;
-SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim3;
 
@@ -65,6 +66,13 @@ const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for Task1DFT */
+osThreadId_t Task1DFTHandle;
+const osThreadAttr_t Task1DFT_attributes = {
+  .name = "Task1DFT",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* USER CODE BEGIN PV */
 osThreadId_t mainTaskHandle;
@@ -86,8 +94,8 @@ static void MX_TIM3_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_DAC_Init(void);
-static void MX_SPI2_Init(void);
 void StartDefaultTask(void *argument);
+extern void DFT(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -100,6 +108,8 @@ void log_out(const char *msg)
 	HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 500);
 	HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 500);
 }
+
+
 /* USER CODE END 0 */
 
 /**
@@ -108,6 +118,7 @@ void log_out(const char *msg)
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -138,7 +149,6 @@ int main(void)
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_DAC_Init();
-  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim3);
 
@@ -167,6 +177,9 @@ int main(void)
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
+  /* creation of Task1DFT */
+  Task1DFTHandle = osThreadNew(DFT, NULL, &Task1DFT_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -179,6 +192,7 @@ int main(void)
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -186,6 +200,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
   /* USER CODE END 3 */
 }
@@ -448,44 +463,6 @@ static void MX_SPI1_Init(void)
   /* USER CODE BEGIN SPI1_Init 2 */
 
   /* USER CODE END SPI1_Init 2 */
-
-}
-
-/**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI2_Init(void)
-{
-
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
-  /* SPI2 parameter configuration*/
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI2_Init 2 */
-
-  /* USER CODE END SPI2_Init 2 */
 
 }
 

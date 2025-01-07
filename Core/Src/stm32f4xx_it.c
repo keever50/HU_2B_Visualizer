@@ -205,13 +205,15 @@ void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
 
-
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
+
+  //HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);  // Mark ISR start
+
+          // Mark ISR end
+
   trigger();
-  HAL_GPIO_TogglePin(GPIOD, LD4_Pin);
   /* USER CODE END TIM3_IRQn 1 */
 }
 
