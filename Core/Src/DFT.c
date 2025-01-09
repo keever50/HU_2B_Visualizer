@@ -11,11 +11,24 @@
 #include <stdlib.h>
 #include "Filter.h"
 #include <math.h>
-
+#include "cmsis_os.h"
+#include "Very_cool_simple_logging_thing/log.h"
 int16_t Bintest(int bin);
 void Shift(int16_t Hoogste, int16_t Laagste,int16_t buffer[buffer_Groote]);
 int16_t Integersqrt(int32_t input);
 void Windowing();
+
+extern int16_t Buffer_1[buffer_Groote];
+extern int16_t Amplitude_1;
+extern int16_t Laagste_1;
+
+extern int16_t Buffer_2[buffer_Groote];
+extern int16_t Amplitude_2;
+extern int16_t Laagste_2;
+
+extern int Flag;
+
+extern int Index;
 
 int16_t Sin[buffer_Groote];
 int16_t Cos[buffer_Groote];
@@ -92,6 +105,12 @@ void Sin_Cos_Gen()
 
 void DFT(void *argument)
 {
+//	for(;;)
+//	{
+//		osDelay(1000);
+//	}
+
+	osDelay(1000);
 	Loop =  (buffer_Groote / 8) * 8;
 	int Bins = buffer_Groote / 2 - 1;
 	int Binlooping = (Bins/8) * 8;
@@ -102,8 +121,11 @@ void DFT(void *argument)
 	while(1)
 	{
 
+		osDelay(10);
+
 		if(Flag == 1)
 		{
+			//LOGF(LOG_DEBUG, "DFT Started", 0);
 			HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
 			Flag = 0;
 
@@ -127,7 +149,10 @@ void DFT(void *argument)
 				bins[i] = Bintest(i);
 
 			HAL_GPIO_TogglePin(GPIOD, LD3_Pin);
+			//LOGF(LOG_DEBUG, "DFT Done", 0);
 		}
+
+
 
 	}
 }
